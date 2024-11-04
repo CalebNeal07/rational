@@ -1,27 +1,29 @@
-from collections import deque
-from itertools import islice, count
-
-n = 33
-
-def fusc():
-    q = deque([1])
-    yield 0
-    yield 1
-
-    while True:
-        x = q.popleft()
-        q.append(x)
-        yield x
-
-        x += q[0]
-        q.append(x)
-        yield x
-
-# Generates the members of stern's diatomic sequence up to n
-sds = list(islice(fusc(), n)) 
-
-print(sds)
-
-for i in range(n - 1):
-    print(f"\\frac{{{sds[i]}}}{{{sds[i + 1]}}}", end=", ")
-
+def findSDSFunc(n):
+ 
+    # Initializing the DP array
+    DP = [0] * (n+1)
+ 
+    # SET the Base case
+    DP[0] = 0
+    DP[1] = 1
+ 
+    # Traversing the array from 
+    # 2nd Element to nth Element
+    for i in range(2, n+1): 
+         
+        # Case 1: for even n
+        if (int(i % 2) == 0):
+            DP[i] = DP[int(i / 2)]
+         
+        # Case 2: for odd n
+        else:
+            DP[i] = (DP[int((i - 1) / 2)]
+                  + DP[int((i + 1) / 2)])
+     
+    return DP[n]
+ 
+ 
+# Driver program
+n = 23483497723467; 
+ 
+print(findSDSFunc(n))
