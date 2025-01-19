@@ -78,5 +78,82 @@ $$ \frac{4}{1}, \frac{1}{5}, \frac{5}{4}, \frac{4}{7}, \frac{7}{3}, \frac{3}{8},
 | $\frac{4}{5}$ |  30   | 0b11110 | $[0; 1, 4]$        |
 | $\frac{5}{1}$ |  31   | 0b11111 | $[5]$              |
 
+## Operations 
+#### Addition:
+Given two fractions in the Calkin-Wilf Sequence $a=\frac{fusc(n)}{fusc(n+1)}, b=\frac{fusc(m)}{fusc(m+1)}$
+$$a+b=\frac{fusc(n)}{fusc(n+1)}+\frac{fusc(m)}{fusc(m+1)}=\frac{fusc(n)\cdot fusc(m+1)+fusc(m)\cdot fusc(n+1)}{fusc(n+1)\cdot fusc(m+1)}$$
+if $a+b=\frac{fusc(s)}{fusc(s+1)}$, $fusc(s)=fusc(n)\cdot fusc(m+1)+fusc(m)\cdot fusc(n+1)$, and $fusc(s+1)=fusc(n+1)\cdot fusc(m+1)$
+
+From $fusc(s)$ and $fusc(s+1)$ s can be decoded as the run length encoding of each value in the odd continued fraction representation of $\frac{fusc(s)}{fusc(s+1)}$.
+
+#### Subtraction:
+Subtraction can be done using the same process as addition, but with a minus sign in the value of $fusc(s)$.
+
+#### Multiplication
+Given two fractions in the Calkin-Wilf Sequence $a=\frac{fusc(n)}{fusc(n+1)}, b=\frac{fusc(m)}{fusc(m+1)}$
+$$a\cdot b=\frac{fusc(n)}{fusc(n+1)}\cdot \frac{fusc(m)}{fusc(m+1)}=\frac{fusc(n)\cdot fusc(m)}{fusc(n+1)\cdot fusc(m+1)}=\frac{fusc(s)}{fusc(s+1)}$$
+
+therefore: 
+$$fusc(s)=fusc(n)\cdot fusc(m)$$
+$$fusc(s+1)=fusc(n+1)\cdot fusc(m+1)$$
+
+and s can be found using the same method as addition.
+
+#### Division
+Division is the same as multiplying the reciprical so swap $fusc(m)$ with $fusc(m+1)$ from the multiplication formula and you get division.
+
+#### Increment
+Incrementation is a special case of addition where one is added to a number $a=\frac{fusc(n)}{fusc(n+1)}$. Substituing 1 into our addition formula gives $$a+1=\frac{fusc(n)}{fusc(n+1)}+1=\frac{fusc(n)+fusc(n+1)}{fusc(n+1)}$$ 
+This can be simplified by the definition of $fusc$:
+$$a+1=\frac{fusc(2n+1)}{fusc(n+1)}$$
+
+#### Exponentiation
+Exponentiation of a number $a=\frac{fusc(n)}{fusc(n+1)}$, is:
+$$a^x=\frac{fusc(n)^x}{fusc(n+1)^x}$$
+
+## Calculating $fusc(n)$
+
+Given the case $fusc(1081)$, 1081 in base 2 is $10000111001_2$, which represents the continued fraction $[1; 2, 3, 4, 1]=1+\frac{1}{2+\frac{1}{3+\frac{1}{4+\frac{1}{1}}}}=\frac{53}{37}$
+
+This can be calculated with the following process:
+
+| $$n$$ | $$n_2$$ | $$p$$ | $$q$$ | mask |
+|-----|-------|-----|-----|----|
+| $1081$ | $10000111001_2$ | $0$ | $0$ |
+| $540$ | $1000011100_2$ | $1$ | $1$ |
+| $135$ | $10000111_2$ | $3$ | $2$ |
+| $16$ | $10000_2$ | $10$ | $7$ |
+| $1$ | $1_2$ | $43$ | $30$ |   
+| $0$ | $0_2$ | $53$ | $37$ |
+
+## Calculating $fusc^-1(p, q)$
+
+In the case where $p > q$:
+
+| $p$ | $q$ | shift | $n$ |
+|-----|-----|-------|-----|
+| 53  | 37  | 1 | $1000000000000000_2$ |
+| 37  | 16  | 2 | $1101111111111111_2$ |
+| 16  | 5   | 3 | $1110010000000000_2$ |
+| 5   | 1   | 5 | $1111100011011111_2$ |
+| 1   | 0   | 0 | $0000011100100000_2$ |
+
+Then make sure the most signifigant bit is one:
+$$n = 1000011100100000_2$$
+Then shift right by the number of trailing zeroes:
+$$n = 0000010000111001_2$$
+$$n = 1081_{10}$$
+
+In the case where $p < q$:
+
+| $p$ | $q$ | shift | $n$ |
+|-----|-----|-------|-----|
+| 37  | 53  | 0 | $0000000000000000_2$ |
+| 53  | 37  | 1 | $0111111111111111_2$ |
+| 37  | 16  | 2 | $0010000000000000_2$ |
+| 16  | 5   | 3 | $0001101111111111_2$ |
+| 5   | 1   | 5 | $0000011100100000_2$ |
+| 1   | 0   | 0 | $1111100011011111_2$ |
+
 [^1]: https://en.wikipedia.org/wiki/Calkin%E2%80%93Wilf_tree#Breadth_first_traversal
 [^2]: https://www.cs.utexas.edu/~EWD/ewd05xx/EWD578.PDF
