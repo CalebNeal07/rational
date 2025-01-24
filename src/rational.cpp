@@ -5,6 +5,22 @@
 
 namespace rational {
 
+char *uint64_to_bin(uint64_t num) {
+    char *str = (char*) malloc(65); // 64 bits + null terminator
+    if (str == NULL) {
+        return NULL; // Memory allocation failed
+    }
+    
+    for (int i = 0; i < 64; i++) {
+        // Calculate the bit position from MSB to LSB
+        uint64_t bit_mask = (uint64_t)1 << (63 - i);
+        str[i] = (num & bit_mask) ? '1' : '0';
+    }
+    str[64] = '\0'; // Null-terminate the string
+    
+    return str;
+}
+
 uint64_t fusc(uint64_t n) {
     int lz = __builtin_clzll(n);
     uint64_t mask = ~0 >> lz;
@@ -35,12 +51,37 @@ uint64_t fusc(uint64_t n) {
 uint64_t inverse_fusc(uint64_t p, uint64_t q) {
     uint64_t n = 0ULL;
 
-    while (p != q) {
-        n >>= p / q;
-        n = ~n;
-        std::cout << "n: " << n << std::endl;
-        std::swap(p, q);
+    if (q == 1) {
+        return ~(~n << p);
     }
+
+    uint64_t mask = 0ULL;
+    std::cout << " p \t q \t shift \t n" << std::endl;
+    std::cout << ' ' << p << " \t" << q << " \t \t " << uint64_to_bin(n) << std::endl; 
+
+    unsigned short shift = 0;
+    bool flag = p < q;
+
+    while (q) {
+        shift = p / q;
+        n = ~n;
+        n >>= shift;
+        mask = ~(~mask >> shift);
+        std::swap(p, q);
+        q -= shift * p;
+        std::cout << ' ' << p << "\t " << q << "\t " << shift << "\t " << uint64_to_bin(n) << std::endl;
+    }
+
+    if (flag) {
+        n = ~n;
+        n >>= __builtin_ctzll(mask);
+        n &= ~0ULL << 1;
+    } else {
+        n |= 1ULL << 63;
+        n >>= __builtin_ctzll(mask);
+    }
+
+    std::cout << std::endl << "n = " << uint64_to_bin(n) << std::endl;
 
     return n;
 }
@@ -65,6 +106,8 @@ Rational Rational::operator+(Rational const& rhs) {
     uint64_t m_1 = rational::fusc(rhs.val + 1);
     uint64_t numerator = (n_0 * m_1) + (m_0 * n_1);
     uint64_t denominator = n_1 * m_1;
+    std::cout << "n: " << n_0 << "/" << n_1 << "\tm: " << m_0 << "/" << m_1 << std::endl;
+    std::cout << "denominator: " << denominator << "\tnumerator: " << numerator << std::endl;
     return Rational(numerator, denominator);
 }
 
