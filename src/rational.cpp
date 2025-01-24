@@ -83,10 +83,8 @@ Rational Rational::operator+(Rational const& rhs) {
     uint64_t n_1 = rational::fusc(this->val + 1);
     uint64_t m_0 = rational::fusc(rhs.val);
     uint64_t m_1 = rational::fusc(rhs.val + 1);
-    std::cout << "n_0: " << n_0 << "\tn_1: " << n_1 << "\tm_0: " << m_0 << "\tm_1: " << m_1 << std::endl;
     uint64_t numerator = (n_0 * m_1) + (m_0 * n_1);
     uint64_t denominator = n_1 * m_1;
-    std::cout << "numerator: " << numerator << "\tdenominator: " << denominator << std::endl;
     return Rational(numerator, denominator);
 }
 
