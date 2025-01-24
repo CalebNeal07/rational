@@ -28,40 +28,21 @@ uint64_t fusc(uint64_t n) {
     return n % 2 == 0 ? q : p;
 }
 
+/** INVERSE FUSC FUNCTION
+ * Calculates the value of n given p and q which are fusc(n) and fusc(n+1) respectively.
+ * Example Walkthrough
+ */
 uint64_t inverse_fusc(uint64_t p, uint64_t q) {
-    int d = std::gcd(p, q);
-    p /= d;
-    q /= d;
+    uint64_t n = 0ULL;
 
-    if (q == 1) {
-        return ~(~0ULL << p);
-    }
-
-    if (p == 1) {
-        return ~(~0ULL << q) << 1;
-    }
-
-    uint64_t val = ~0ULL;
-
-    bool signal = p < q;
-
-    if (signal) {
-        val = ~val;
+    while (p != q) {
+        n >>= p / q;
+        n = ~n;
+        std::cout << "n: " << n << std::endl;
         std::swap(p, q);
     }
 
-    while (q) {
-        int shift = p / q;
-        val = signal ? (~val) >> shift : ~(val >> shift);
-        p -= shift * q;
-        std::swap(p, q);
-    }
-    
-    val = ~val;
-    val |= 1ULL << 63;
-    val >>= signal ? __builtin_ctzll(~val) : __builtin_ctzll(val);
-
-    return val;
+    return n;
 }
 
 Rational::Rational(uint64_t p, uint64_t q) {
@@ -78,7 +59,6 @@ bool operator==(Rational const& lhs, Rational const& rhs) {
 }
 
 Rational Rational::operator+(Rational const& rhs) {
-    std::cout << "val: " << val << std::endl;
     uint64_t n_0 = rational::fusc(this->val);
     uint64_t n_1 = rational::fusc(this->val + 1);
     uint64_t m_0 = rational::fusc(rhs.val);
@@ -88,28 +68,30 @@ Rational Rational::operator+(Rational const& rhs) {
     return Rational(numerator, denominator);
 }
 
-// Rational::operator-(Rational) {
-//     uint64_t n_0 = rational::fusc(this->val);
-//     uint64_t n_1 = rational::fusc(this->val + 1);
-//     uint64_t m_0 = rational::fusc(rhs->val);
-//     uint64_t m_1 = rational::fusc(rhs->val + 1);
-//     return rational::inverse_fusc((n_0 * m_1) - (m_0 * n_1), n_1 * m_1);
-// }
+Rational Rational::operator-(Rational const& rhs) {
+    uint64_t n_0 = rational::fusc(this->val);
+    uint64_t n_1 = rational::fusc(this->val + 1);
+    uint64_t m_0 = rational::fusc(rhs.val);
+    uint64_t m_1 = rational::fusc(rhs.val + 1);
+    uint64_t numerator = (n_0 * m_1) - (m_0 * n_1);
+    uint64_t denominator = n_1 * m_1;
+    return Rational(numerator, denominator);
+}
 
-// Rational::operator*(Rational const& rhs) {
-//     uint64_t n_0 = rational::fusc(this->val);
-//     uint64_t n_1 = rational::fusc(this->val + 1);
-//     uint64_t m_0 = rational::fusc(rhs->val);
-//     uint64_t m_1 = rational::fusc(rhs->val + 1);
-//     return rational::inverse_fusc(n_0 * m_0, n_1 * m_1);
-// }
+Rational Rational::operator*(Rational const& rhs) {
+    uint64_t n_0 = rational::fusc(this->val);
+    uint64_t n_1 = rational::fusc(this->val + 1);
+    uint64_t m_0 = rational::fusc(rhs.val);
+    uint64_t m_1 = rational::fusc(rhs.val + 1);
+    return Rational(n_0 * m_0, n_1 * m_1);
+}
 
-// Rational::operator/(Rational const^ rhs) {
-//     uint64_t n_0 = rational::fusc(this->val);
-//     uint64_t n_1 = rational::fusc(this->val + 1);
-//     uint64_t m_0 = rational::fusc(rhs->val);
-//     uint64_t m_1 = rational::fusc(rhs->val + 1);
-//     return rational::inverse_fusc(n_0 * m_1, n_1 * m_0);
-// }
+Rational Rational::operator/(Rational const& rhs) {
+    uint64_t n_0 = rational::fusc(this->val);
+    uint64_t n_1 = rational::fusc(this->val + 1);
+    uint64_t m_0 = rational::fusc(rhs.val);
+    uint64_t m_1 = rational::fusc(rhs.val + 1);
+    return Rational(n_0 * m_1, n_1 * m_0);
+}
 
 }
