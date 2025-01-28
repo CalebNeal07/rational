@@ -22,68 +22,74 @@ char *uint64_to_bin(uint64_t num) {
     return str;
 }
 
-// uint64_t fusc(uint64_t n) {
-//     int lz = __builtin_clzll(n);
-//     uint64_t mask = ~0 >> lz;
-//     mask <<= lz;
-//     uint64_t val = ~(~n << lz);
+uint64_t fusc(uint64_t n) {
+    int lz = __builtin_clzll(n);
+    uint64_t mask = ~0 >> lz;
+    mask <<= lz;
+    uint64_t val = n;
     
-//     uint64_t p = 1, q = 0; 
+    if (__builtin_ctzll(val) == 1) {
+        val = ~(val | 1ULL);
+    }
 
-//     std::cout << " n \t p \t q \t term" << std::endl;
-//     while (mask) {
-//         val = val ^ mask;
-//         int term = __builtin_clzll(val);
+    val = ~(~n << lz); 
+    
+    uint64_t p = 1, q = 0; 
 
-//         uint64_t temp = p;
-//         p = (term * p) + q;
-//         q = temp;
+    //std::cout << " n \t p \t q \t term" << std::endl;
+    while (mask) {
+        val = val ^ mask;
+        int term = __builtin_clzll(val);
 
-//         val = ~(~val << term);
-//         mask = mask << term;
-//         std::cout << val << "\t" << p << "\t" << q << "\t" << term << std::endl;
+        uint64_t temp = p;
+        p = (term * p) + q;
+        q = temp;
+
+        val = ~(~val << term);
+        mask = mask << term;
+        //std::cout << val << "\t" << p << "\t" << q << "\t" << term << std::endl;
+    }
+
+    return n % 2 == 0 ? q : p;
+}
+
+// uint64_t fusc(uint64_t n) {
+
+//     std::cout << "fusc(" << n << ")\n";
+//     if (n <= 1) {
+//         return n;
 //     }
 
-//     return n % 2 == 0 ? q : p;
-// }
+//     uint64_t val = n;
+//     int lz = __builtin_clzll(val);
+//     uint64_t mask = ~0 << lz;
+//     if (__builtin_ctzll(val) == 1) {
+//         val |= 1ULL;
+//     }
+//     val <<= lz;
 
-uint64_t fusc(uint64_t n) {
+//     uint64_t p = 1, q = 0;
 
-    std::cout << "fusc(" << n << ")\n";
-    if (n <= 1) {
-        return n;
-    }
+//     while (val) {
+//         int term = __builtin_clzll(val ^ mask);
+//         p += term * q;
+//         std::swap(p, q);
+//         val <<= term;
+//         mask <<= term;
 
-    uint64_t val = n;
-    int lz = __builtin_clzll(val);
-    uint64_t mask = ~0 << lz;
-    if (__builtin_ctzll(val) == 1) {
-        val |= 1ULL;
-    }
-    val <<= lz;
+//         std::cout << term << std::endl;
 
-    uint64_t p = 1, q = 0;
-
-    while (val) {
-        int term = __builtin_clzll(val ^ mask);
-        p += term * q;
-        std::swap(p, q);
-        val <<= term;
-        mask <<= term;
-
-        std::cout << term << std::endl;
-
-        term = __builtin_clzll(~(val ^ mask));
-        p += term * q;
-        std::swap(p, q);
-        val <<= term;
-        mask <<= term;
+//         term = __builtin_clzll(~(val ^ mask));
+//         p += term * q;
+//         std::swap(p, q);
+//         val <<= term;
+//         mask <<= term;
         
-        std::cout << term << std::endl;
-    }
+//         std::cout << term << std::endl;
+//     }
 
-    return p;
-}
+//     return p;
+// }
 
 /** INVERSE FUSC FUNCTION
  * Calculates the value of n given p and q which are fusc(n) and fusc(n+1) respectively.
@@ -147,8 +153,8 @@ Rational Rational::operator+(Rational const& rhs) {
     uint64_t m_1 = rational::fusc(rhs.val + 1);
     uint64_t numerator = (n_0 * m_1) + (m_0 * n_1);
     uint64_t denominator = n_1 * m_1;
-    std::cout << "n: " << n_0 << "/" << n_1 << "\tm: " << m_0 << "/" << m_1 << std::endl;
-    std::cout << "denominator: " << denominator << "\tnumerator: " << numerator << std::endl;
+    // std::cout << "n: " << n_0 << "/" << n_1 << "\tm: " << m_0 << "/" << m_1 << std::endl;
+    // std::cout << "denominator: " << denominator << "\tnumerator: " << numerator << std::endl;
     return Rational(numerator, denominator);
 }
 
