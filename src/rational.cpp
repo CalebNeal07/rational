@@ -48,27 +48,41 @@ char *uint64_to_bin(uint64_t num) {
 // }
 
 uint64_t fusc(uint64_t n) {
-    uint64_t num = n;
-    std::vector<uint8_t> terms(64 - __builtin_clz(num));
 
-    std::cout << "\nfusc(" << n << ")\n\n";
-
-    while (num) {
-        uint16_t c = (terms.size() % 2 == 0) ? __builtin_ctzll(~num) : __builtin_ctzll(num);
-        std::cout << c << std::endl;
-        terms.push_back(c);
-        num >>= c;
+    std::cout << "fusc(" << n << ")\n";
+    if (n <= 1) {
+        return n;
     }
 
-    uint64_t numerator = static_cast<uint64_t>(terms.back());
-    uint64_t denominator = 1;
+    uint64_t val = n;
+    int lz = __builtin_clzll(val);
+    uint64_t mask = ~0 << lz;
+    if (__builtin_ctzll(val) == 1) {
+        val |= 1ULL;
+    }
+    val <<= lz;
 
-    for (auto term : terms) {
-        std::swap(numerator, denominator);
-        numerator += static_cast<uint64_t>(term) * denominator;
+    uint64_t p = 1, q = 0;
+
+    while (val) {
+        int term = __builtin_clzll(val ^ mask);
+        p += term * q;
+        std::swap(p, q);
+        val <<= term;
+        mask <<= term;
+
+        std::cout << term << std::endl;
+
+        term = __builtin_clzll(~(val ^ mask));
+        p += term * q;
+        std::swap(p, q);
+        val <<= term;
+        mask <<= term;
+        
+        std::cout << term << std::endl;
     }
 
-    return numerator;
+    return p;
 }
 
 /** INVERSE FUSC FUNCTION
