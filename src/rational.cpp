@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <numeric>
+#include <vector>
 
 namespace rational {
 
@@ -21,27 +22,53 @@ char *uint64_to_bin(uint64_t num) {
     return str;
 }
 
-uint64_t fusc(uint64_t n) {
-    int lz = __builtin_clzll(n);
-    uint64_t mask = ~0 >> lz;
-    mask <<= lz;
-    uint64_t val = ~(~n << lz);
+// uint64_t fusc(uint64_t n) {
+//     int lz = __builtin_clzll(n);
+//     uint64_t mask = ~0 >> lz;
+//     mask <<= lz;
+//     uint64_t val = ~(~n << lz);
     
-    uint64_t p = 1, q = 0; 
+//     uint64_t p = 1, q = 0; 
 
-    while (mask != 0) {
-        val = val ^ mask;
-        int term = __builtin_clzll(val);
+//     std::cout << " n \t p \t q \t term" << std::endl;
+//     while (mask) {
+//         val = val ^ mask;
+//         int term = __builtin_clzll(val);
 
-        uint64_t temp = p;
-        p = (term * p) + q;
-        q = temp;
+//         uint64_t temp = p;
+//         p = (term * p) + q;
+//         q = temp;
 
-        val = ~(~val << term);
-        mask = mask << term;
+//         val = ~(~val << term);
+//         mask = mask << term;
+//         std::cout << val << "\t" << p << "\t" << q << "\t" << term << std::endl;
+//     }
+
+//     return n % 2 == 0 ? q : p;
+// }
+
+uint64_t fusc(uint64_t n) {
+    uint64_t num = n;
+    std::vector<uint8_t> terms(64 - __builtin_clz(num));
+
+    std::cout << "\nfusc(" << n << ")\n\n";
+
+    while (num) {
+        uint16_t c = (terms.size() % 2 == 0) ? __builtin_ctzll(~num) : __builtin_ctzll(num);
+        std::cout << c << std::endl;
+        terms.push_back(c);
+        num >>= c;
     }
 
-    return n % 2 == 0 ? q : p;
+    uint64_t numerator = static_cast<uint64_t>(terms.back());
+    uint64_t denominator = 1;
+
+    for (auto term : terms) {
+        std::swap(numerator, denominator);
+        numerator += static_cast<uint64_t>(term) * denominator;
+    }
+
+    return numerator;
 }
 
 /** INVERSE FUSC FUNCTION
@@ -56,8 +83,8 @@ uint64_t inverse_fusc(uint64_t p, uint64_t q) {
     }
 
     uint64_t mask = 0ULL;
-    std::cout << " p \t q \t shift \t n" << std::endl;
-    std::cout << ' ' << p << " \t" << q << " \t \t " << uint64_to_bin(n) << std::endl; 
+    // std::cout << " p \t q \t shift \t n" << std::endl;
+    // std::cout << ' ' << p << " \t" << q << " \t \t " << uint64_to_bin(n) << std::endl; 
 
     unsigned short shift = 0;
     bool flag = p < q;
@@ -69,7 +96,7 @@ uint64_t inverse_fusc(uint64_t p, uint64_t q) {
         mask = ~(~mask >> shift);
         std::swap(p, q);
         q -= shift * p;
-        std::cout << ' ' << p << "\t " << q << "\t " << shift << "\t " << uint64_to_bin(n) << std::endl;
+        // std::cout << ' ' << p << "\t " << q << "\t " << shift << "\t " << uint64_to_bin(n) << std::endl;
     }
 
     if (flag) {
@@ -81,7 +108,7 @@ uint64_t inverse_fusc(uint64_t p, uint64_t q) {
         n >>= __builtin_ctzll(mask);
     }
 
-    std::cout << std::endl << "n = " << uint64_to_bin(n) << std::endl;
+    // std::cout << std::endl << "n = " << uint64_to_bin(n) << std::endl;
 
     return n;
 }
